@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Uber App - CRUD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<h2>UBER CUSTOMER MANAGEMENT</h2>
+
+<!-- INSERT FORM -->
+<form action="/insert" method="POST">
+    <input type="text" name="name" placeholder="Name" required>
+    <input type="text" name="mobile" placeholder="Mobile" required>
+    <input type="number" name="amount" placeholder="Amount" required>
+    <input type="text" name="location" placeholder="Location" required>
+    <button type="submit">Add Customer</button>
+</form>
+
+<br>
+
+<!-- TABLE -->
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Amount</th>
+        <th>Location</th>
+        <th>Action</th>
+    </tr>
+
+    {% for row in customers %}
+    <tr>
+        <form action="/update" method="POST">
+            <td>{{ row[0] }}</td>
+            <td><input type="text" name="name" value="{{ row[1] }}"></td>
+            <td><input type="text" name="mobile" value="{{ row[2] }}"></td>
+            <td><input type="number" name="amount" value="{{ row[3] }}"></td>
+            <td><input type="text" name="location" value="{{ row[4] }}"></td>
+
+            <input type="hidden" name="id" value="{{ row[0] }}">
+
+            <td>
+                <button type="submit">Update</button>
+                <a href="/delete/{{ row[0] }}" onclick="return confirm('Delete?')">Delete</a>
+            </td>
+        </form>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>
