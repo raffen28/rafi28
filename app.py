@@ -1,15 +1,14 @@
 from flask import Flask, render_template, request, redirect
 import mysql.connector
-import random
 import os
 from urllib.parse import urlparse
 
 app = Flask(__name__)
 
-# 🔥 GET DATABASE URL
-db_url = os.getenv("mysql://root:JZidTEmzAxWDoOvsnKBTrThPJwTVIFBZ@interchange.proxy.rlwy.net:23681/railway")
+# ✅ Correct env variable name
+db_url = os.getenv("DATABASE_URL")
 
-# 👉 fallback for local testing (IMPORTANT)
+# 👉 fallback (local use)
 if not db_url:
     db_url = "mysql://root:JZidTEmzAxWDoOvsnKBTrThPJwTVIFBZ@interchange.proxy.rlwy.net:23681/railway"
 
@@ -20,38 +19,35 @@ db = mysql.connector.connect(
     host=url.hostname,
     user=url.username,
     password=url.password,
-    database=url.path[1:],   # ✅ correct way (remove "/")
+    database=url.path.lstrip('/'),  # ✅ safer
     port=url.port
 )
 
 cursor = db.cursor()
 
-# 🟢 HOME + READ
+# 🟢 HOME
 @app.route('/')
 def index():
     cursor.execute("SELECT * FROM customer")
     data = cursor.fetchall()
     return render_template('index.html', customers=data)
 
-# 🟢 CREATE (INSERT)
+# 🟢 INSERT
 @app.route('/insert', methods=['POST'])
 def insert():
     try:
-        #id = random.randint(1000, 9999)
         cursor.execute("SELECT MAX(id) FROM customer")
         result = cursor.fetchone()
 
-        if result[0] is None:
-            id = 1
-        else:
-            id = result[0] + 1
+        id = 1 if result[0] is None else result[0] + 1
+
         name = request.form['name']
         mobile = request.form['mobile']
         amount = request.form['amount']
         location = request.form['location']
 
         sql = "INSERT INTO customer (id, name, mobile, amount, location) VALUES (%s, %s, %s, %s, %s)"
-        values = (id,name, mobile, amount, location)
+        values = (id, name, mobile, amount, location)
 
         cursor.execute(sql, values)
         db.commit()
